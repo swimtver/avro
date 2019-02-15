@@ -17,23 +17,29 @@
 # Dockerfile for installing the necessary dependencies for building Avro.
 # See BUILD.txt.
 
-FROM java:8-jdk
+FROM openjdk:8
 
 WORKDIR /root
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Add the repository for node.js 4.x
-RUN curl -sL https://deb.nodesource.com/setup_4.x | bash -
+# Add the repository for node.js 6.x
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
+
+# Register Microsoft key and feed for .NET SDK
+# https://dotnet.microsoft.com/download/linux-package-manager/debian8/sdk-current
+RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg && \
+  mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/ && \
+  wget -q https://packages.microsoft.com/config/debian/9/prod.list && \
+  mv prod.list /etc/apt/sources.list.d/microsoft-prod.list && \
+  chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg && \
+  chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+
+RUN curl https://packages.sury.org/php/apt.gpg | apt-key add --no-tty - && \
+      echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
 
 # Install dependencies from packages
 RUN apt-get -qq update && \
-  # Add the repository for Mono (https://www.mono-project.com/download/stable/#download-lin-debian)
-  apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF && \
-  apt-get -qq install -y apt-transport-https && \
-  echo "deb https://download.mono-project.com/repo/debian stable-jessie main" | tee /etc/apt/sources.list.d/mono-official-stable.list && \
-  apt-get -qq update && \
-  # END Add the repository for Mono
   apt-get -qq install --no-install-recommends -y \
     ant \
     asciidoc \
@@ -41,6 +47,7 @@ RUN apt-get -qq update && \
     bzip2 \
     cmake \
     curl \
+    dotnet-sdk-2.2 \
     doxygen \
     flex \
     g++ \
@@ -52,16 +59,13 @@ RUN apt-get -qq update && \
     libglib2.0-dev \
     libjansson-dev \
     libsnappy-dev \
-    libsnappy1 \
+    libsnappy1v5 \
     make \
     maven \
-    mono-devel \
-    mono-complete \
     nodejs \
     perl \
-    php5 \
-    php5-gmp \
-    phpunit \
+    php5.6 \
+    php5.6-gmp \
     python \
     python-setuptools \
     python3-setuptools \
@@ -96,6 +100,9 @@ RUN curl -L http://cpanmin.us | perl - --self-upgrade && \
   Math::BigInt JSON::XS Try::Tiny Regexp::Common Encode \
   IO::String Object::Tiny Compress::Zlib Test::More \
   Test::Exception Test::Pod
+
+# Install PHPUnit
+RUN wget -O /usr/local/bin/phpunit https://phar.phpunit.de/phpunit-5.6.phar && chmod +x /usr/local/bin/phpunit
 
 # Install Ruby modules
 RUN gem install echoe yajl-ruby multi_json snappy

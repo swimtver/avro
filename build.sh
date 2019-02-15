@@ -82,10 +82,6 @@ do
     ;;
 
     dist)
-      # ensure version matches
-      # FIXME: enforcer is broken:MENFORCER-42
-      # mvn enforcer:enforce -Davro.version=$VERSION
-
       # build source tarball
       mkdir -p build
 
@@ -227,10 +223,16 @@ UserSpecificDocker
       # within the container and use the result on your normal
       # system.  And this also is a significant speedup in subsequent
       # builds because the dependencies are downloaded only once.
+      #
+      # On OSX, it's highly suggested to set an env variable of:
+      # export DOCKER_MOUNT_FLAG=":delegated"
+      # Using :delegated will drop the "mvn install" time from over 30 minutes
+      # down to under 10.  However, editing files from OSX may take a few
+      # extra second before the changes are available within the docker container.
       docker run --rm -t -i \
-        -v ${PWD}:/home/${USER_NAME}/avro \
+        -v ${PWD}:/home/${USER_NAME}/avro${DOCKER_MOUNT_FLAG} \
         -w /home/${USER_NAME}/avro \
-        -v ${HOME}/.m2:/home/${USER_NAME}/.m2 \
+        -v ${HOME}/.m2:/home/${USER_NAME}/.m2${DOCKER_MOUNT_FLAG} \
         -v ${HOME}/.gnupg:/home/${USER_NAME}/.gnupg \
         -u ${USER_NAME} \
         ${DOCKER_XTRA_ARGS} \
