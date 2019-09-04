@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,8 +44,8 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
 public class IDLProtocolMojo extends AbstractAvroMojo {
   /**
    * A set of Ant-like inclusion patterns used to select files from the source
-   * directory for processing. By default, the pattern
-   * <code>**&#47;*.avdl</code> is used to select IDL files.
+   * directory for processing. By default, the pattern <code>**&#47;*.avdl</code>
+   * is used to select IDL files.
    *
    * @parameter
    */
@@ -53,8 +53,8 @@ public class IDLProtocolMojo extends AbstractAvroMojo {
 
   /**
    * A set of Ant-like inclusion patterns used to select files from the source
-   * directory for processing. By default, the pattern
-   * <code>**&#47;*.avdl</code> is used to select IDL files.
+   * directory for processing. By default, the pattern <code>**&#47;*.avdl</code>
+   * is used to select IDL files.
    *
    * @parameter
    */
@@ -77,11 +77,11 @@ public class IDLProtocolMojo extends AbstractAvroMojo {
         for (Object runtimeClasspathElement : runtimeClasspathElements) {
           String element = (String) runtimeClasspathElement;
           runtimeUrls.add(new File(element).toURI().toURL());
-      }
+        }
       }
 
-      URLClassLoader projPathLoader = new URLClassLoader
-          (runtimeUrls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader());
+      URLClassLoader projPathLoader = new URLClassLoader(runtimeUrls.toArray(new URL[0]),
+          Thread.currentThread().getContextClassLoader());
       try (Idl parser = new Idl(new File(sourceDirectory, filename), projPathLoader)) {
 
         Protocol p = parser.CompilationUnit();
@@ -94,6 +94,7 @@ public class IDLProtocolMojo extends AbstractAvroMojo {
         compiler.setCreateOptionalGetters(createOptionalGetters);
         compiler.setGettersReturnOptional(gettersReturnOptional);
         compiler.setCreateSetters(createSetters);
+        compiler.setAdditionalVelocityTools(instantiateAdditionalVelocityTools());
         compiler.setEnableDecimalLogicalType(enableDecimalLogicalType);
         for (String customConversion : customConversions) {
           compiler.addCustomConversion(projPathLoader.loadClass(customConversion));
@@ -101,11 +102,7 @@ public class IDLProtocolMojo extends AbstractAvroMojo {
         compiler.setOutputCharacterEncoding(project.getProperties().getProperty("project.build.sourceEncoding"));
         compiler.compileToDestination(null, outputDirectory);
       }
-    } catch (ParseException e) {
-      throw new IOException(e);
-    } catch (DependencyResolutionRequiredException drre) {
-      throw new IOException(drre);
-    } catch (ClassNotFoundException e) {
+    } catch (ParseException | ClassNotFoundException | DependencyResolutionRequiredException e) {
       throw new IOException(e);
     }
   }
@@ -114,7 +111,6 @@ public class IDLProtocolMojo extends AbstractAvroMojo {
   protected String[] getIncludes() {
     return includes;
   }
-
 
   @Override
   protected String[] getTestIncludes() {

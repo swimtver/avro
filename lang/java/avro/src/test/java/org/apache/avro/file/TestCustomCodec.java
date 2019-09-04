@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@
 
 package org.apache.avro.file;
 
-
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -37,8 +37,8 @@ public class TestCustomCodec {
     assertFalse(customCodec.equals(snappyCodec));
 
     String testString = "Testing 123";
-    ByteBuffer original = ByteBuffer.allocate(testString.getBytes().length);
-    original.put(testString.getBytes());
+    ByteBuffer original = ByteBuffer.allocate(testString.getBytes(UTF_8).length);
+    original.put(testString.getBytes(UTF_8));
     original.rewind();
     ByteBuffer decompressed = null;
     try {
@@ -49,7 +49,7 @@ public class TestCustomCodec {
       e.printStackTrace();
     }
 
-    assertEquals(testString, new String(decompressed.array()));
+    assertEquals(testString, new String(decompressed.array(), UTF_8));
 
   }
 

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,7 +38,8 @@ public interface SchemaValidator {
    * schema(s).
    *
    * @param toValidate The schema to validate
-   * @param existing The schemas to validate against, in order from most recent to latest if applicable
+   * @param existing   The schemas to validate against, in order from most recent
+   *                   to latest if applicable
    * @throws SchemaValidationException if the schema fails to validate.
    */
   void validate(Schema toValidate, Iterable<Schema> existing) throws SchemaValidationException;

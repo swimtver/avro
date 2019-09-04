@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,8 +39,8 @@ public class TestAvroValueDeserializer {
     Schema writerSchema = Schema.create(Schema.Type.STRING);
     Schema readerSchema = Schema.create(Schema.Type.STRING);
     ClassLoader classLoader = this.getClass().getClassLoader();
-    AvroValueDeserializer<CharSequence> deserializer =
-      new AvroValueDeserializer<>(writerSchema, readerSchema, classLoader);
+    AvroValueDeserializer<CharSequence> deserializer = new AvroValueDeserializer<>(writerSchema, readerSchema,
+        classLoader);
 
     // Check the schemas.
     assertEquals(writerSchema, deserializer.getWriterSchema());

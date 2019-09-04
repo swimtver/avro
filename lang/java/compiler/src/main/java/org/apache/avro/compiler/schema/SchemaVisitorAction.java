@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,22 +20,23 @@ package org.apache.avro.compiler.schema;
 
 public enum SchemaVisitorAction {
 
-    /**
-     * continue visit.
-     */
-    CONTINUE,
-    /**
-     * terminate visit.
-     */
-    TERMINATE,
-    /**
-     * when returned from pre non terminal visit method the children of the non terminal are skipped.
-     * afterVisitNonTerminal for the current schema will not be invoked.
-     */
-    SKIP_SUBTREE,
-    /**
-     * Skip visiting the  siblings of this schema.
-     */
-    SKIP_SIBLINGS;
+  /**
+   * continue visit.
+   */
+  CONTINUE,
+  /**
+   * terminate visit.
+   */
+  TERMINATE,
+  /**
+   * when returned from pre non terminal visit method the children of the non
+   * terminal are skipped. afterVisitNonTerminal for the current schema will not
+   * be invoked.
+   */
+  SKIP_SUBTREE,
+  /**
+   * Skip visiting the siblings of this schema.
+   */
+  SKIP_SIBLINGS;
 
 }

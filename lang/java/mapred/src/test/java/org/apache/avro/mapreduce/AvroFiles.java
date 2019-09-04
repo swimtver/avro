@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,19 +30,19 @@ import org.apache.avro.io.DatumWriter;
  * A utility class for working with Avro container files within tests.
  */
 public final class AvroFiles {
-  private AvroFiles() {}
+  private AvroFiles() {
+  }
 
   /**
    * Creates an avro container file.
    *
-   * @param file The file to create.
-   * @param schema The schema for the records the file should contain.
+   * @param file    The file to create.
+   * @param schema  The schema for the records the file should contain.
    * @param records The records to put in the file.
-   * @param <T> The (java) type of the avro records.
+   * @param         <T> The (java) type of the avro records.
    * @return The created file.
    */
-  public static <T> File createFile(File file, Schema schema, T... records)
-      throws IOException {
+  public static <T> File createFile(File file, Schema schema, T... records) throws IOException {
     DatumWriter<T> datumWriter = new GenericDatumWriter<>(schema);
     DataFileWriter<T> fileWriter = new DataFileWriter<>(datumWriter);
     fileWriter.create(schema, file);

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import junit.framework.Assert;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileStream;
 import org.apache.avro.file.DataFileWriter;
@@ -40,7 +39,7 @@ public class TestDataFileMeta {
   @Rule
   public TemporaryFolder DIR = new TemporaryFolder();
 
-  @Test(expected=AvroRuntimeException.class)
+  @Test(expected = AvroRuntimeException.class)
   public void testUseReservedMeta() {
     DataFileWriter<?> w = new DataFileWriter<>(new GenericDatumWriter<>());
     w.setMeta("avro.foo", "bar");
@@ -61,7 +60,7 @@ public class TestDataFileMeta {
     assertEquals("bar", r.getMetaString("hello"));
   }
 
-  @Test(expected=AvroRuntimeException.class)
+  @Test(expected = AvroRuntimeException.class)
   public void testUseMetaAfterCreate() throws IOException {
     DataFileWriter<?> w = new DataFileWriter<>(new GenericDatumWriter<>());
     w.create(Schema.create(Type.NULL), new ByteArrayOutputStream());
@@ -79,6 +78,6 @@ public class TestDataFileMeta {
         exceptions++;
       }
     }
-    Assert.assertEquals(33, exceptions);
+    assertEquals(33, exceptions);
   }
 }

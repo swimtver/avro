@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,13 +52,13 @@ public class JacksonUtils {
     }
   }
 
-  @SuppressWarnings(value="unchecked")
+  @SuppressWarnings(value = "unchecked")
   static void toJson(Object datum, JsonGenerator generator) throws IOException {
     if (datum == JsonProperties.NULL_VALUE) { // null
       generator.writeNull();
     } else if (datum instanceof Map) { // record, map
       generator.writeStartObject();
-      for (Map.Entry<Object,Object> entry : ((Map<Object,Object>) datum).entrySet()) {
+      for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) datum).entrySet()) {
         generator.writeFieldName(entry.getKey().toString());
         toJson(entry.getValue(), generator);
       }
@@ -117,11 +117,9 @@ public class JacksonUtils {
         return (float) jsonNode.asDouble();
       }
     } else if (jsonNode.isTextual()) {
-      if (schema == null || schema.getType().equals(Schema.Type.STRING) ||
-          schema.getType().equals(Schema.Type.ENUM)) {
+      if (schema == null || schema.getType().equals(Schema.Type.STRING) || schema.getType().equals(Schema.Type.ENUM)) {
         return jsonNode.asText();
-      } else if (schema.getType().equals(Schema.Type.BYTES)
-              || schema.getType().equals(Schema.Type.FIXED)) {
+      } else if (schema.getType().equals(Schema.Type.BYTES) || schema.getType().equals(Schema.Type.FIXED)) {
         return jsonNode.textValue().getBytes(StandardCharsets.ISO_8859_1);
       }
     } else if (jsonNode.isArray()) {
@@ -132,7 +130,7 @@ public class JacksonUtils {
       return l;
     } else if (jsonNode.isObject()) {
       Map m = new LinkedHashMap();
-      for (Iterator<String> it = jsonNode.fieldNames(); it.hasNext(); ) {
+      for (Iterator<String> it = jsonNode.fieldNames(); it.hasNext();) {
         String key = it.next();
         Schema s = null;
         if (schema == null) {

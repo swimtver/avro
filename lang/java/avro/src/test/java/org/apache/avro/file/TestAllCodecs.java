@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,14 +35,9 @@ public class TestAllCodecs {
 
   @Parameterized.Parameters(name = "{index}: codec={0}")
   public static Collection<Object[]> data() {
-    return Arrays.asList(new Object[][] {
-      { "bzip2", BZip2Codec.class },
-      { "zstandard", ZstandardCodec.class },
-      { "null", NullCodec.class },
-      { "xz", XZCodec.class },
-      { "snappy", SnappyCodec.class },
-      { "deflate", DeflateCodec.class },
-    });
+    return Arrays.asList(new Object[][] { { "bzip2", BZip2Codec.class }, { "zstandard", ZstandardCodec.class },
+        { "null", NullCodec.class }, { "xz", XZCodec.class }, { "snappy", SnappyCodec.class },
+        { "deflate", DeflateCodec.class }, });
   }
 
   @Parameterized.Parameter(0)
@@ -50,7 +45,6 @@ public class TestAllCodecs {
 
   @Parameterized.Parameter(1)
   public Class<? extends Codec> codecClass;
-
 
   @Test
   public void testCodec() throws IOException {

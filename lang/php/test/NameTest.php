@@ -8,7 +8,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,7 +42,7 @@ class NameExample
   }
 }
 
-class NameTest extends PHPUnit_Framework_TestCase
+class NameTest extends PHPUnit\Framework\TestCase
 {
 
   function fullname_provider()
@@ -101,6 +101,6 @@ class NameTest extends PHPUnit_Framework_TestCase
    */
   function test_name($name, $is_well_formed)
   {
-    $this->assertEquals(AvroName::is_well_formed_name($name), $is_well_formed, $name);
+    $this->assertEquals(AvroName::is_well_formed_name($name), $is_well_formed);
   }
 }

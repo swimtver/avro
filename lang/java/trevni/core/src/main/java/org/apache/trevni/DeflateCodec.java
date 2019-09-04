@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,8 +46,7 @@ class DeflateCodec extends Codec {
     return ByteBuffer.wrap(baos.toByteArray());
   }
 
-  private void writeAndClose(ByteBuffer data, OutputStream out)
-    throws IOException {
+  private void writeAndClose(ByteBuffer data, OutputStream out) throws IOException {
     out.write(data.array(), data.position(), data.remaining());
     out.close();
   }

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@
 
 package org.apache.avro.grpc;
 
+import com.google.common.io.ByteStreams;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Protocol;
 import org.apache.avro.io.BinaryDecoder;
@@ -35,7 +36,6 @@ import java.io.OutputStream;
 
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
-import io.grpc.internal.IoUtils;
 
 /** Marshaller for Avro RPC response. */
 public class AvroResponseMarshaller implements MethodDescriptor.Marshaller<Object> {
@@ -55,7 +55,8 @@ public class AvroResponseMarshaller implements MethodDescriptor.Marshaller<Objec
   @Override
   public Object parse(InputStream stream) {
     try {
-      if (message.isOneWay()) return null;
+      if (message.isOneWay())
+        return null;
       BinaryDecoder in = DECODER_FACTORY.binaryDecoder(stream, null);
       if (!in.readBoolean()) {
         Object response = new SpecificDatumReader(message.getResponse()).read(null, in);
@@ -68,14 +69,13 @@ public class AvroResponseMarshaller implements MethodDescriptor.Marshaller<Objec
         return new AvroRuntimeException(value.toString());
       }
     } catch (IOException e) {
-      throw Status.INTERNAL.withCause(e).
-          withDescription("Error deserializing avro response").asRuntimeException();
+      throw Status.INTERNAL.withCause(e).withDescription("Error deserializing avro response").asRuntimeException();
     } finally {
       AvroGrpcUtils.skipAndCloseQuietly(stream);
     }
   }
 
-  private class AvroResponseInputStream extends AvroInputStream {
+  private static class AvroResponseInputStream extends AvroInputStream {
     private final Protocol.Message message;
     private Object response;
 
@@ -88,7 +88,7 @@ public class AvroResponseMarshaller implements MethodDescriptor.Marshaller<Objec
     public int drainTo(OutputStream target) throws IOException {
       int written;
       if (getPartial() != null) {
-        written = (int) IoUtils.copy(getPartial(), target);
+        written = (int) ByteStreams.copy(getPartial(), target);
       } else {
         written = writeResponse(target);
       }

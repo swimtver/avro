@@ -1,4 +1,4 @@
-﻿/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,16 +17,28 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using Avro.Generic;
 using Avro.IO;
 using Avro.Specific;
 
 namespace Avro.File
 {
+    /// <summary>
+    /// Provides access to Avro data written using the <see cref="DataFileWriter{T}"/>.
+    /// </summary>
+    /// <typeparam name="T">Type to deserialze data objects to.</typeparam>
     public class DataFileReader<T> : IFileReader<T>
     {
+        /// <summary>
+        /// Defines the signature for a function that returns a new <see cref="DatumReader{T}"/>
+        /// given a writer and reader schema.
+        /// </summary>
+        /// <param name="writerSchema">Schema used to write the datum.</param>
+        /// <param name="readerSchema">Schema used to read the datum.</param>
+        /// <returns>A datum reader.</returns>
         public delegate DatumReader<T> CreateDatumReader(Schema writerSchema, Schema readerSchema);
 
         private DatumReader<T> _reader;
@@ -56,8 +68,9 @@ namespace Avro.File
         /// <summary>
         ///  Open a reader for a file using path and the reader's schema
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">Path to the file</param>
+        /// <param name="readerSchema">Schema used to read data from the file</param>
+        /// <returns>A new file reader</returns>
         public static IFileReader<T> OpenReader(string path, Schema readerSchema)
         {
             return OpenReader(new FileStream(path, FileMode.Open), readerSchema);
@@ -74,21 +87,23 @@ namespace Avro.File
         }
 
         /// <summary>
-        ///  Open a reader for a stream using the reader's schema
+        /// Open a reader for a stream using the reader's schema
         /// </summary>
-        /// <param name="inStream"></param>
-        /// <returns></returns>
+        /// <param name="inStream">Stream containing the file contents</param>
+        /// <param name="readerSchema">Schema used to read the file</param>
+        /// <returns>A new file reader</returns>
         public static IFileReader<T> OpenReader(Stream inStream, Schema readerSchema)
         {
             return OpenReader(inStream, readerSchema, CreateDefaultReader);
         }
 
-
         /// <summary>
         ///  Open a reader for a stream using the reader's schema and a custom DatumReader
         /// </summary>
-        /// <param name="inStream"></param>
-        /// <returns></returns>
+        /// <param name="inStream">Stream of file contents</param>
+        /// <param name="readerSchema">Schema used to read the file</param>
+        /// <param name="datumReaderFactory">Factory to create datum readers given a reader an writer schema</param>
+        /// <returns>A new file reader</returns>
         public static IFileReader<T> OpenReader(Stream inStream, Schema readerSchema, CreateDatumReader datumReaderFactory)
         {
             if (!inStream.CanSeek)
@@ -117,21 +132,25 @@ namespace Avro.File
             BlockFinished();
         }
 
+        /// <inheritdoc/>
         public Header GetHeader()
         {
             return _header;
         }
 
+        /// <inheritdoc/>
         public Schema GetSchema()
         {
             return _header.Schema;
         }
 
+        /// <inheritdoc/>
         public ICollection<string> GetMetaKeys()
         {
             return _header.MetaData.Keys;
         }
 
+        /// <inheritdoc/>
         public byte[] GetMeta(string key)
         {
             try
@@ -144,11 +163,13 @@ namespace Avro.File
             }
         }
 
+        /// <inheritdoc/>
         public long GetMetaLong(string key)
         {
-            return long.Parse(GetMetaString(key));
+            return long.Parse(GetMetaString(key), CultureInfo.InvariantCulture);
         }
 
+        /// <inheritdoc/>
         public string GetMetaString(string key)
         {
             byte[] value = GetMeta(key);
@@ -162,10 +183,12 @@ namespace Avro.File
             }
             catch (Exception e)
             {
-                throw new AvroRuntimeException(string.Format("Error fetching meta data for key: {0}", key), e);
+                throw new AvroRuntimeException(string.Format(CultureInfo.InvariantCulture,
+                    "Error fetching meta data for key: {0}", key), e);
             }
         }
 
+        /// <inheritdoc/>
         public void Seek(long position)
         {
             _stream.Position = position;
@@ -175,6 +198,7 @@ namespace Avro.File
             _blockStart = position;
         }
 
+        /// <inheritdoc/>
         public void Sync(long position)
         {
             Seek(position);
@@ -189,35 +213,48 @@ namespace Avro.File
             {
                 bool done = false;
 
-                do // read until sync mark matched
+                // read until sync mark matched
+                do
                 {
                     _decoder.ReadFixed(_syncBuffer);
                     if (Enumerable.SequenceEqual(_syncBuffer, _header.SyncData))
+                    {
                         done = true;
+                    }
                     else
-                        _stream.Position = _stream.Position - (DataFileConstants.SyncSize - 1);
-                } while (!done);
+                    {
+                        _stream.Position -= DataFileConstants.SyncSize - 1;
+                    }
+                }
+                while (!done);
             }
-            catch (Exception) { } // could not find .. default to EOF
+            catch
+            {
+                // could not find .. default to EOF
+            }
 
             _blockStart = _stream.Position;
         }
 
+        /// <inheritdoc/>
         public bool PastSync(long position)
         {
-            return ((_blockStart >= position + DataFileConstants.SyncSize) || (_blockStart >= _stream.Length));
+            return (_blockStart >= position + DataFileConstants.SyncSize) || (_blockStart >= _stream.Length);
         }
 
+        /// <inheritdoc/>
         public long PreviousSync()
         {
             return _blockStart;
         }
 
+        /// <inheritdoc/>
         public long Tell()
         {
             return _stream.Position;
         }
 
+        /// <inheritdoc/>
         public IEnumerable<T> NextEntries
         {
             get
@@ -229,6 +266,7 @@ namespace Avro.File
             }
         }
 
+        /// <inheritdoc/>
         public bool HasNext()
         {
             try
@@ -249,16 +287,33 @@ namespace Avro.File
             }
             catch (Exception e)
             {
-                throw new AvroRuntimeException(string.Format("Error fetching next object from block: {0}", e));
+                throw new AvroRuntimeException(string.Format(CultureInfo.InvariantCulture,
+                    "Error fetching next object from block: {0}", e));
             }
         }
 
+        /// <summary>
+        /// Resets this reader.
+        /// </summary>
         public void Reset()
         {
             Init(_stream);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases resources associated with this <see cref="DataFileReader{T}"/>.
+        /// </summary>
+        /// <param name="disposing">
+        /// True if called from <see cref="Dispose()"/>; false otherwise.
+        /// </param>
+        protected virtual void Dispose(bool disposing)
         {
             _stream.Close();
         }
@@ -328,6 +383,7 @@ namespace Avro.File
             return Codec.CreateCodecFromString(GetMetaString(DataFileConstants.MetaDataCodec));
         }
 
+        /// <inheritdoc/>
         public T Next()
         {
             return Next(default(T));
@@ -349,7 +405,8 @@ namespace Avro.File
             }
             catch (Exception e)
             {
-                throw new AvroRuntimeException(string.Format("Error fetching next object from block: {0}", e));
+                throw new AvroRuntimeException(string.Format(CultureInfo.InvariantCulture,
+                    "Error fetching next object from block: {0}", e));
             }
         }
 
@@ -418,7 +475,46 @@ namespace Avro.File
             }
             catch (Exception e)
             {
-                throw new AvroRuntimeException(string.Format("Error ascertaining if data has next block: {0}", e));
+                throw new AvroRuntimeException(string.Format(CultureInfo.InvariantCulture,
+                    "Error ascertaining if data has next block: {0}", e), e);
+            }
+        }
+
+        /// <summary>
+        /// Encapsulates a block of data read by the <see cref="DataFileReader{T}"/>.
+        /// </summary>
+        private class DataBlock
+        {
+            /// <summary>
+            /// Raw bytes within this block.
+            /// </summary>
+            public byte[] Data { get;  set; }
+
+            /// <summary>
+            /// Number of entries in this block.
+            /// </summary>
+            public long NumberOfEntries { get; set; }
+
+            /// <summary>
+            /// Size of this block in bytes.
+            /// </summary>
+            public long BlockSize { get; set; }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="DataBlock"/> class.
+            /// </summary>
+            /// <param name="numberOfEntries">Number of entries in this block.</param>
+            /// <param name="blockSize">Size of this block in bytes.</param>
+            public DataBlock(long numberOfEntries, long blockSize)
+            {
+                NumberOfEntries = numberOfEntries;
+                BlockSize = blockSize;
+                Data = new byte[blockSize];
+            }
+
+            internal Stream GetDataAsStream()
+            {
+                return new MemoryStream(Data);
             }
         }
     }

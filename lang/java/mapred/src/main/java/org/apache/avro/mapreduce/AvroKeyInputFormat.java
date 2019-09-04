@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,17 +33,19 @@ import org.slf4j.LoggerFactory;
 /**
  * A MapReduce InputFormat that can handle Avro container files.
  *
- * <p>Keys are AvroKey wrapper objects that contain the Avro data.  Since Avro
- * container files store only records (not key/value pairs), the value from
- * this InputFormat is a NullWritable.</p>
+ * <p>
+ * Keys are AvroKey wrapper objects that contain the Avro data. Since Avro
+ * container files store only records (not key/value pairs), the value from this
+ * InputFormat is a NullWritable.
+ * </p>
  */
 public class AvroKeyInputFormat<T> extends FileInputFormat<AvroKey<T>, NullWritable> {
   private static final Logger LOG = LoggerFactory.getLogger(AvroKeyInputFormat.class);
 
   /** {@inheritDoc} */
   @Override
-  public RecordReader<AvroKey<T>, NullWritable> createRecordReader(
-      InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
+  public RecordReader<AvroKey<T>, NullWritable> createRecordReader(InputSplit split, TaskAttemptContext context)
+      throws IOException, InterruptedException {
     Schema readerSchema = AvroJob.getInputKeySchema(context.getConfiguration());
     if (null == readerSchema) {
       LOG.warn("Reader schema was not set. Use AvroJob.setInputKeySchema() if desired.");

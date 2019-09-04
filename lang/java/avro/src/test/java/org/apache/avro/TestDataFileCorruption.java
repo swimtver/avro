@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,7 +35,7 @@ import org.junit.Test;
 
 public class TestDataFileCorruption {
 
-  private static final File DIR = new File( "/tmp");
+  private static final File DIR = new File("/tmp");
 
   private File makeFile(String name) {
     return new File(DIR, "test-" + name + ".avro");
@@ -66,8 +66,8 @@ public class TestDataFileCorruption {
     int corruptedBytes = 3;
     byte[] corrupted = new byte[original.length + corruptedBytes];
     System.arraycopy(original, 0, corrupted, 0, corruptPosition);
-    System.arraycopy(original, corruptPosition,
-        corrupted, corruptPosition + corruptedBytes, original.length - corruptPosition);
+    System.arraycopy(original, corruptPosition, corrupted, corruptPosition + corruptedBytes,
+        original.length - corruptPosition);
 
     File file = makeFile("corrupt");
     file.deleteOnExit();
@@ -76,8 +76,7 @@ public class TestDataFileCorruption {
     out.close();
 
     // Read the data file
-    DataFileReader r = new DataFileReader<>(file,
-        new GenericDatumReader<>(schema));
+    DataFileReader r = new DataFileReader<>(file, new GenericDatumReader<>(schema));
     assertEquals("apple", r.next().toString());
     assertEquals("banana", r.next().toString());
     long prevSync = r.previousSync();

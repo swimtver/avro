@@ -1,4 +1,5 @@
 package org.apache.avro.ipc.jetty;
+
 import org.apache.avro.ipc.stats.StatsPlugin;
 import org.apache.avro.ipc.stats.StatsServlet;
 /*
@@ -10,7 +11,7 @@ import org.apache.avro.ipc.stats.StatsServlet;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,8 +35,9 @@ public class StatsServer {
   Server httpServer;
   StatsPlugin plugin;
 
-  /* Start a stats server on the given port,
-   * responsible for the given plugin. */
+  /*
+   * Start a stats server on the given port, responsible for the given plugin.
+   */
   public StatsServer(StatsPlugin plugin, int port) throws Exception {
     this.httpServer = new Server(port);
     this.plugin = plugin;

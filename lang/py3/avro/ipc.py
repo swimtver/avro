@@ -10,7 +10,7 @@
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +29,7 @@ import os
 import socketserver
 
 from avro import io as avro_io
-from avro import protocol
-from avro import schema
+from avro import protocol, schema
 
 logger = logging.getLogger(__name__)
 
@@ -602,7 +601,7 @@ class Transceiver(object, metaclass=abc.ABCMeta):
 class HTTPTransceiver(Transceiver):
   """HTTP-based transceiver implementation."""
 
-  def __init__(self, host, port, req_resource='/'):
+  def __init__(self, host, port, req_resource='/', ssl=False):
     """Initializes a new HTTP transceiver.
 
     Args:
@@ -611,7 +610,10 @@ class HTTPTransceiver(Transceiver):
       req_resource: Optional HTTP resource path to use, '/' by default.
     """
     self._req_resource = req_resource
-    self._conn = http.client.HTTPConnection(host, port)
+    if ssl:
+        self._conn = http.client.HTTPSConnection(host, port)
+    else:
+        self._conn = http.client.HTTPConnection(host, port)
     self._conn.connect()
     self._remote_name = self._conn.sock.getsockname()
 

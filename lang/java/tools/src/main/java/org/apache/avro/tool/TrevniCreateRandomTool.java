@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,8 +41,7 @@ public class TrevniCreateRandomTool implements Tool {
   }
 
   @Override
-  public int run(InputStream stdin, PrintStream out, PrintStream err,
-                 List<String> args) throws Exception {
+  public int run(InputStream stdin, PrintStream out, PrintStream err, List<String> args) throws Exception {
     if (args.size() != 3) {
       err.println("Usage: schemaFile count outputFile");
       return 1;
@@ -54,8 +53,7 @@ public class TrevniCreateRandomTool implements Tool {
 
     Schema schema = new Schema.Parser().parse(schemaFile);
 
-    AvroColumnWriter<Object> writer =
-      new AvroColumnWriter<>(schema, new ColumnFileMetaData());
+    AvroColumnWriter<Object> writer = new AvroColumnWriter<>(schema, new ColumnFileMetaData());
 
     for (Object datum : new RandomData(schema, count))
       writer.write(datum);

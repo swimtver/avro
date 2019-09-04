@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,7 +44,7 @@ public abstract class AbstractAvroMojoTest extends AbstractMojoTestCase {
    * Assert the existence files in the given given directory.
    *
    * @param directory the directory being checked
-   * @param files the files whose existence is being checked.
+   * @param files     the files whose existence is being checked.
    */
   protected void assertFilesExist(File directory, String... files) {
     assertNotNull(directory);

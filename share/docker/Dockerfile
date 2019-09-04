@@ -6,7 +6,7 @@
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,10 @@
 # See BUILD.txt.
 
 FROM openjdk:8
+
+# TODO: Consolidate them into a single version (7.x) when we drop PHP 5.6 support in the future
+ENV PHP5_VERSION 5.6
+ENV PHP7_VERSION 7.1
 
 WORKDIR /root
 
@@ -39,12 +43,14 @@ RUN curl https://packages.sury.org/php/apt.gpg | apt-key add --no-tty - && \
       echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
 
 # Install dependencies from packages
+# TODO: remove php5-related packages when we drop PHP 5.6 support in the future
 RUN apt-get -qq update && \
   apt-get -qq install --no-install-recommends -y \
     ant \
     asciidoc \
     bison \
     bzip2 \
+    bundler \
     cmake \
     curl \
     dotnet-sdk-2.2 \
@@ -53,6 +59,7 @@ RUN apt-get -qq update && \
     g++ \
     gcc \
     git \
+    isort \
     libboost-all-dev \
     libfontconfig1-dev \
     libfreetype6-dev \
@@ -64,11 +71,22 @@ RUN apt-get -qq update && \
     maven \
     nodejs \
     perl \
-    php5.6 \
-    php5.6-gmp \
+    php${PHP5_VERSION} \
+    php${PHP5_VERSION}-gmp \
+    php${PHP7_VERSION} \
+    php${PHP7_VERSION}-gmp \
+    pycodestyle \
     python \
+    python-isort \
+    python-pip \
     python-setuptools \
+    python-snappy \
+    python-wheel \
+    python3-isort \
+    python3-pip \
     python3-setuptools \
+    python3-snappy \
+    python3-wheel \
     rake \
     ruby \
     ruby-dev \
@@ -78,34 +96,27 @@ RUN apt-get -qq update && \
   apt-get -qq clean && \
   rm -rf /var/lib/apt/lists/*
 
-# Install Forrest in /usr/local/apache-forrest
-RUN curl -L -s "http://www.apache.org/dyn/closer.lua?action=download&filename=/forrest/apache-forrest-0.9-sources.tar.gz" | tar -xzf - -C /usr/local/ && \
-    curl -L -s "http://www.apache.org/dyn/closer.lua?action=download&filename=/forrest/apache-forrest-0.9-dependencies.tar.gz" | tar -xzf - -C /usr/local/ && \
-    mv /usr/local/apache-forrest-0.9 /usr/local/apache-forrest && \
-    cd /usr/local/apache-forrest/main && \
-    ./build.sh
-
-# The solution for https://issues.apache.org/jira/browse/PIG-3906
-# Configure where forrest can be found
-RUN mkdir -p /usr/local/apache-forrest/plugins       && chmod a+rwX -R /usr/local/apache-forrest/plugins && \
-    mkdir -p /usr/local/apache-forrest/build/plugins && chmod a+rwX -R /usr/local/apache-forrest/build/plugins && \
-    echo 'forrest.home=/usr/local/apache-forrest' > build.properties
-
-ENV FORREST_HOME /usr/local/apache-forrest
-
 # Install Perl modules
-RUN curl -L http://cpanmin.us | perl - --self-upgrade && \
-  cpanm install Module::Install Module::Install::ReadmeFromPod \
+RUN curl -L https://cpanmin.us | perl - --self-upgrade && \
+  cpanm  --mirror https://www.cpan.org/ install Module::Install Module::Install::ReadmeFromPod \
   Module::Install::Repository \
   Math::BigInt JSON::XS Try::Tiny Regexp::Common Encode \
   IO::String Object::Tiny Compress::Zlib Test::More \
-  Test::Exception Test::Pod
+  Test::Exception Test::Pod Perl::Critic Compress::Zstd
 
-# Install PHPUnit
-RUN wget -O /usr/local/bin/phpunit https://phar.phpunit.de/phpunit-5.6.phar && chmod +x /usr/local/bin/phpunit
+# Install PHPUnit 5.7, which is the only version that supports both PHP 5.6 and 7.x
+# TODO: use PHPUnit 7.x instead of 5.7 when we drop PHP 5.6 support in the future
+RUN wget -O /usr/local/bin/phpunit https://phar.phpunit.de/phpunit-5.7.phar && chmod +x /usr/local/bin/phpunit
+
+# Install Python2 packages
+RUN pip install zstandard
+
+# Install Python3 packages
+RUN pip3 install zstandard
 
 # Install Ruby modules
-RUN gem install echoe yajl-ruby multi_json snappy
+COPY lang/ruby/Gemfile /tmp
+RUN bundle install --gemfile=/tmp/Gemfile
 
 # Install global Node modules
 RUN npm install -g grunt-cli

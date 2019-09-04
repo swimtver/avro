@@ -8,7 +8,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@
  */
 require_once('test_helper.php');
 
-class FloatIntEncodingTest extends PHPUnit_Framework_TestCase
+class FloatIntEncodingTest extends PHPUnit\Framework\TestCase
 {
   const FLOAT_TYPE = 'float';
   const DOUBLE_TYPE = 'double';

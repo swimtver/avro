@@ -8,7 +8,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@
 
 require_once('test_helper.php');
 
-class StringIOTest extends PHPUnit_Framework_TestCase
+class StringIOTest extends PHPUnit\Framework\TestCase
 {
 
   public function test_write()
@@ -34,17 +34,30 @@ class StringIOTest extends PHPUnit_Framework_TestCase
 
   public function test_seek()
   {
-    $this->markTestIncomplete('This test has not been implemented yet.');
+    $strio = new AvroStringIO('abcdefghijklmnopqrstuvwxyz');
+    $strio->seek(4, AvroIO::SEEK_SET);
+    $this->assertEquals('efgh', $strio->read(4));
+    $strio->seek(4, AvroIO::SEEK_CUR);
+    $this->assertEquals('mnop', $strio->read(4));
+    $strio->seek(-4, AvroIO::SEEK_END);
+    $this->assertEquals('wxyz', $strio->read(4));
   }
 
   public function test_tell()
   {
-    $this->markTestIncomplete('This test has not been implemented yet.');
+    $strio = new AvroStringIO('foobar');
+    $this->assertEquals(0, $strio->tell());
+    $strlen = 3;
+    $strio->read($strlen);
+    $this->assertEquals($strlen, $strio->tell());
   }
 
   public function test_read()
   {
-    $this->markTestIncomplete('This test has not been implemented yet.');
+    $str = 'foobar';
+    $strio = new AvroStringIO($str);
+    $strlen = 3;
+    $this->assertEquals(substr($str, 0, $strlen), $strio->read($strlen));
   }
 
   public function test_string_rep()

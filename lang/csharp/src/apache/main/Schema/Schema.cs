@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,6 @@
  * limitations under the License.
  */
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
@@ -33,20 +31,79 @@ namespace Avro
         /// </summary>
         public enum Type
         {
+            /// <summary>
+            /// No value.
+            /// </summary>
             Null,
+
+            /// <summary>
+            /// A binary value.
+            /// </summary>
             Boolean,
+
+            /// <summary>
+            /// A 32-bit signed integer.
+            /// </summary>
             Int,
+
+            /// <summary>
+            /// A 64-bit signed integer.
+            /// </summary>
             Long,
+
+            /// <summary>
+            /// A single precision (32-bit) IEEE 754 floating-point number.
+            /// </summary>
             Float,
+
+            /// <summary>
+            /// A double precision (64-bit) IEEE 754 floating-point number.
+            /// </summary>
             Double,
+
+            /// <summary>
+            /// A sequence of 8-bit unsigned bytes.
+            /// </summary>
             Bytes,
+
+            /// <summary>
+            /// An unicode character sequence.
+            /// </summary>
             String,
+
+            /// <summary>
+            /// A logical collection of fields.
+            /// </summary>
             Record,
+
+            /// <summary>
+            /// An enumeration.
+            /// </summary>
             Enumeration,
+
+            /// <summary>
+            /// An array of values.
+            /// </summary>
             Array,
+
+            /// <summary>
+            /// A map of values with string keys.
+            /// </summary>
             Map,
+
+            /// <summary>
+            /// A union.
+            /// </summary>
             Union,
+
+            /// <summary>
+            /// A fixed-length byte string.
+            /// </summary>
             Fixed,
+
+            /// <summary>
+            /// A protocol error.
+            /// </summary>
             Error
         }
 
@@ -64,6 +121,7 @@ namespace Avro
         /// Constructor for schema class
         /// </summary>
         /// <param name="type"></param>
+        /// <param name="props">dictionary that provides access to custom properties</param>
         protected Schema(Type type, PropertyMap props)
         {
             this.Tag = type;
@@ -71,19 +129,19 @@ namespace Avro
         }
 
         /// <summary>
-        /// If this is a record, enum or fixed, returns its name, otherwise the name the primitive type. 
+        /// If this is a record, enum or fixed, returns its name, otherwise the name the primitive type.
         /// </summary>
         public abstract string Name { get; }
-        
+
         /// <summary>
         /// The name of this schema. If this is a named schema such as an enum, it returns the fully qualified
         /// name for the schema. For other schemas, it returns the type of the schema.
         /// </summary>
-        public virtual string Fullname 
+        public virtual string Fullname
         {
             get { return Name; }
         }
-        
+
         /// <summary>
         /// Static class to return new instance of schema object
         /// </summary>
@@ -105,7 +163,7 @@ namespace Avro
                 NamedSchema schema = null;
                 if (names.TryGetValue(value, null, encspace, out schema)) return schema;
 
-                throw new SchemaParseException("Undefined name: " + value);
+                throw new SchemaParseException($"Undefined name: {value} at '{jtok.Path}'");
             }
 
             if (jtok is JArray) // union schema with no 'type' property or union type for a record field
@@ -117,7 +175,7 @@ namespace Avro
 
                 JToken jtype = jo["type"];
                 if (null == jtype)
-                    throw new SchemaParseException("Property type is required");
+                    throw new SchemaParseException($"Property type is required at '{jtok.Path}'");
 
                 var props = Schema.GetProperties(jtok);
 
@@ -125,9 +183,9 @@ namespace Avro
                 {
                     string type = (string)jtype;
 
-                    if (type.Equals("array"))
+                    if (type.Equals("array", StringComparison.Ordinal))
                         return ArraySchema.NewInstance(jtok, props, names, encspace);
-                    if (type.Equals("map"))
+                    if (type.Equals("map", StringComparison.Ordinal))
                         return MapSchema.NewInstance(jtok, props, names, encspace);
 
                     Schema schema = PrimitiveSchema.NewInstance((string)type, props);
@@ -138,7 +196,7 @@ namespace Avro
                 else if (jtype.Type == JTokenType.Array)
                     return UnionSchema.NewInstance(jtype as JArray, props, names, encspace);
             }
-            throw new AvroTypeException("Invalid JSON for schema: " + jtok);
+            throw new AvroTypeException($"Invalid JSON for schema: {jtok} at '{jtok.Path}'");
         }
 
         /// <summary>
@@ -148,7 +206,7 @@ namespace Avro
         /// <returns>new Schema object</returns>
         public static Schema Parse(string json)
         {
-            if (string.IsNullOrEmpty(json)) throw new ArgumentNullException("json", "json cannot be null.");
+            if (string.IsNullOrEmpty(json)) throw new ArgumentNullException(nameof(json), "json cannot be null.");
             return Parse(json.Trim(), new SchemaNames(), null); // standalone schema, so no enclosing namespace
         }
 
@@ -166,7 +224,8 @@ namespace Avro
 
             try
             {
-                bool IsArray = json.StartsWith("[") && json.EndsWith("]");
+                bool IsArray = json.StartsWith("[", StringComparison.Ordinal)
+                    && json.EndsWith("]", StringComparison.Ordinal);
                 JContainer j = IsArray ? (JContainer)JArray.Parse(json) : (JContainer)JObject.Parse(json);
 
                 return ParseJson(j, names, encspace);
@@ -233,8 +292,7 @@ namespace Avro
         /// <returns>symbol name</returns>
         public static string GetTypeString(Type type)
         {
-            if (type != Type.Enumeration) return type.ToString().ToLower();
-            return "enum";
+            return type != Type.Enumeration ? type.ToString().ToLowerInvariant() : "enum";
         }
 
         /// <summary>
@@ -270,7 +328,7 @@ namespace Avro
         {
             if (null == this.Props) return null;
             string v;
-            return (this.Props.TryGetValue(key, out v)) ? v : null;
+            return this.Props.TryGetValue(key, out v) ? v : null;
         }
 
         /// <summary>
