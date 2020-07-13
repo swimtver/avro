@@ -24,6 +24,7 @@ import tempfile
 import unittest
 
 from avro import datafile, io, schema
+from avro.datafile import NULL_CODEC, DEFLATE_CODEC, BZIP2_CODEC, SNAPPY_CODEC, XZ_CODEC, ZSTANDARD_CODEC
 
 try:
   import snappy
@@ -86,15 +87,15 @@ SCHEMAS_TO_VALIDATE = (
 )
 
 def get_codecs_to_validate():
-  codecs = ('null', 'deflate')
+  codecs = (NULL_CODEC, DEFLATE_CODEC, BZIP2_CODEC, XZ_CODEC)
 
   if HAS_SNAPPY:
-    codecs += ('snappy',)
+    codecs += (SNAPPY_CODEC,)
   else:
     logging.warning('Snappy not present, will skip testing it.')
 
   if HAS_ZSTANDARD:
-    codecs += ('zstandard',)
+    codecs += (ZSTANDARD_CODEC,)
   else:
     logging.warning('Zstandard not present, will skip testing it.')
 
@@ -151,7 +152,7 @@ class TestDataFile(unittest.TestCase):
         logging.debug('Creating data file %r', file_path)
         with open(file_path, 'wb') as writer:
           datum_writer = io.DatumWriter()
-          schema_object = schema.Parse(writer_schema)
+          schema_object = schema.parse(writer_schema)
           with datafile.DataFileWriter(
               writer=writer,
               datum_writer=datum_writer,
@@ -201,7 +202,7 @@ class TestDataFile(unittest.TestCase):
         logging.debug('Creating data file %r', file_path)
         with open(file_path, 'wb') as writer:
           datum_writer = io.DatumWriter()
-          schema_object = schema.Parse(writer_schema)
+          schema_object = schema.parse(writer_schema)
           with datafile.DataFileWriter(
               writer=writer,
               datum_writer=datum_writer,
@@ -247,7 +248,7 @@ class TestDataFile(unittest.TestCase):
     with open(file_path, 'wb') as writer:
       datum_writer = io.DatumWriter()
       sample_schema, sample_datum = SCHEMAS_TO_VALIDATE[1]
-      schema_object = schema.Parse(sample_schema)
+      schema_object = schema.parse(sample_schema)
       with datafile.DataFileWriter(writer, datum_writer, schema_object) as dfw:
         dfw.append(sample_datum)
       self.assertTrue(writer.closed)
@@ -268,7 +269,7 @@ class TestDataFile(unittest.TestCase):
     with open(file_path, 'wb') as writer:
       datum_writer = io.DatumWriter()
       sample_schema, sample_datum = SCHEMAS_TO_VALIDATE[1]
-      schema_object = schema.Parse(sample_schema)
+      schema_object = schema.parse(sample_schema)
       with datafile.DataFileWriter(writer, datum_writer, schema_object) as dfw:
         dfw.SetMeta('test.string', 'foo')
         dfw.SetMeta('test.number', '1')
@@ -285,6 +286,20 @@ class TestDataFile(unittest.TestCase):
         for datum in dfr:
           datums.append(datum)
       self.assertTrue(reader.closed)
+
+  def test_empty_datafile(self):
+    """A reader should not fail to read a file consisting of a single empty block."""
+    file_path = self.NewTempFile()
+    sample_schema = schema.parse(SCHEMAS_TO_VALIDATE[1][0])
+    with datafile.DataFileWriter(open(file_path, 'wb'), io.DatumWriter(), sample_schema) as dfw:
+      dfw.flush()
+      # Write an empty block
+      dfw.encoder.write_long(0)
+      dfw.encoder.write_long(0)
+      dfw.writer.write(dfw.sync_marker)
+
+    with datafile.DataFileReader(open(file_path, 'rb'), io.DatumReader()) as dfr:
+      self.assertEqual([], list(dfr))
 
 
 # ------------------------------------------------------------------------------

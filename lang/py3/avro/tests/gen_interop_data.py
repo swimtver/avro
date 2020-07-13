@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 from avro import datafile, io, schema
+from avro.datafile import NULL_CODEC
 
 DATUM = {
     'intField': 12,
@@ -45,11 +46,11 @@ DATUM = {
 
 
 def generate(schema_file, output_path):
-  interop_schema = schema.Parse(open(schema_file, 'r').read())
+  interop_schema = schema.parse(open(schema_file, 'r').read())
   datum_writer = io.DatumWriter()
   for codec in datafile.VALID_CODECS:
     filename = 'py3'
-    if codec != 'null':
+    if codec != NULL_CODEC:
       filename += '_' + codec
     with Path(output_path, filename).with_suffix('.avro').open('wb') as writer, \
       datafile.DataFileWriter(writer, datum_writer, interop_schema, codec) as dfw:
